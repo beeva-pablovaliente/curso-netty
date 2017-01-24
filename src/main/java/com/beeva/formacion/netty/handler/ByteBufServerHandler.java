@@ -16,6 +16,6 @@ public class ByteBufServerHandler extends SimpleChannelInboundHandler<ByteBuf> {
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
         System.out.println(msg.toString(Charset.forName("UTF-8")));
 
-        ctx.writeAndFlush(msg.alloc()).addListener(ChannelFutureListener.CLOSE);
+        ctx.writeAndFlush(msg.retain()).addListener(ChannelFutureListener.CLOSE);
     }
 }

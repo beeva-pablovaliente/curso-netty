@@ -1,5 +1,6 @@
 package com.beeva.formacion.netty.server;
 
+import com.beeva.formacion.netty.codecs.PersonToByteEncoder;
 import com.beeva.formacion.netty.handler.ByteBufServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -8,6 +9,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 /**
  * Created by Beeva Architecture Team
@@ -27,6 +30,8 @@ public class Server {
                     @Override
                     protected void initChannel(NioSocketChannel ch) throws Exception {
                         ch.pipeline()
+                                .addLast(new LoggingHandler(LogLevel.INFO))
+                                .addLast(new PersonToByteEncoder())
                                 .addLast(new ByteBufServerHandler());
                     }
                 });

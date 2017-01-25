@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div id="g1-cpu" class="gauge col-md-6"></div>
+        <div id="g2-mem" class="gauge col-md-6"></div>
+    </div>
+    <div class="row">
+        <div id="other" class="col-md-12"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="welcome"></div>
+            <div id="channel-info"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(eventDom) {
+    if(typeof(EventSource) !== "undefined") {
+        var source = new EventSource('http://localhost:8080/stream');
+
+        source.onmessage = function(event) {
+            document.getElementById("other").innerHTML = "Unknown: " + event.data + "<br>";
+        };
+
+        source.addEventListener("welcome", function(e) {
+            document.getElementById("welcome").innerHTML = "Welcome: " + e.data + "<br>";
+        }, false);
+
+        source.addEventListener("cpu", function(e) {
+            //document.getElementById("cpu").innerHTML = "CPU Usage: " + e.data + "<br>";
+            g1Cpu.refresh(e.data);
+        }, false);
+
+        source.addEventListener("memory", function(e) {
+            //document.getElementById("memory").innerHTML = "Memory: " + e.data + "<br>";
+            var memJson = JSON.parse(e.data);
+
+            g2Mem.refresh(memJson.total - memJson.free, memJson.total);
+        }, false);
+
+        source.addEventListener("ChannelInfo", function(e) {
+            document.getElementById("channel-info").innerHTML = "ChannelInfo: " + e.data + "<br>";
+        }, false);
+    } else {
+        document.getElementById("other").innerHTML = "Sorry, your browser does not support server-sent events...";
+    }
+
+    //Prepare the gauges
+    var g1Cpu = new JustGage({
+        id: "g1-cpu",
+        title: "CPU",
+        label: "%",
+        value: 0,
+        min: 0,
+        max: 100,
+        relativeGaugeSize: true
+    });
+    var g2Mem = new JustGage({
+        id: "g2-mem",
+        title: "Memory",
+        value: 0,
+        min: 0,
+        max: 100,
+        humanFriendly: true,
+        relativeGaugeSize: true
+    });
+
+});
+</script>
+<script src="js/raphael-2.1.4.min.js"></script>
+<script src="js/justgage.js"></script>
+</body>
+</html>
